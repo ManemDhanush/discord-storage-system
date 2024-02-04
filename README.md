@@ -8,11 +8,11 @@
 2. **Install Dependencies:**  
    Open npm and execute the following commands to install necessary dependencies:
    ```
-   `npm install nodemon`
-   `npm install mongoose `
-   `npm install express `
-   `npm install discord.js`
-   `npm install dotenv`
+   npm install nodemon
+   npm install mongoose 
+   npm install express 
+   npm install discord.js
+   npm install dotenv
    ```
 
 ## Bot Creation
