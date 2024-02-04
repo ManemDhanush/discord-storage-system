@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Environment variables file
+.env
+
+# IDE and editor files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+*.out
+*.log
