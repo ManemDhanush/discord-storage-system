@@ -1,5 +1,5 @@
-import upload from '../api/discord/upload.js';
-import download from '../api/discord/download.js';
+const upload = require('../api/discord/upload.js');
+const download = require('../api/discord/download.js');
 
 function commandLineArguments(argv) {
     const uploadIndex = argv.findIndex((arg) => {
@@ -8,7 +8,8 @@ function commandLineArguments(argv) {
 
     if (uploadIndex > -1) {
         const filePath = argv[uploadIndex + 1];
-        upload(filePath);
+        const title = argv[uploadIndex + 2];
+        upload(filePath, title);
 
         return;
     }
@@ -18,12 +19,12 @@ function commandLineArguments(argv) {
     });
 
     if (downloadIndex > -1) {
-        const filePath = argv[downloadIndex + 1];
-        download(filePath);
+        const title = argv[downloadIndex + 1];
+        download(title);
 
         return;
     }
 
 }
 
-export default commandLineArguments;
+module.exports = commandLineArguments

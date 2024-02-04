@@ -3,10 +3,11 @@ const {Client, IntentsBitField} = require('discord.js');
 const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
 
-// Create a new client instance with intents (basically set of permissions that the bot needs)
 
-export default async function upload(text) {
+// the format to upload is node src/index.js -u "filePath" "title"
+async function upload(filePath, title) {
     
+    // Create a new client instance with intents (basically set of permissions that the bot needs)
     const client = new Client({
         intents: [
             IntentsBitField.Flags.Guilds,
@@ -21,9 +22,9 @@ export default async function upload(text) {
     client.on('ready', async () => {
         console.log(`Logged in as ${client.user.tag}!`);
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
-        const channel = guild.channels.cache.get(process.env.CHANNEL_ID);
+        const channel = guild.channels.cache.get(process.env.CHANNEL_ID); // hardcoded for now
         const thread = await channel.threads.create({
-            name: "fakeMessage", 
+            name: title, 
             reason: 'User requested a thread' // Optional reason for audit logs
         });
         const newThread = new Thread({
@@ -41,9 +42,11 @@ export default async function upload(text) {
         await thread.join();
         // Send a confirmation message
         await thread.send(`Created and joined thread: ${thread.name}`);
-        await thread.send(text);
-        console.log(thread)
+        await thread.send(filePath); // yet add attachment support
+        await client.destroy();
     });
 
     client.login(process.env.LOGIN_TOKEN);
 }
+
+module.exports = upload
