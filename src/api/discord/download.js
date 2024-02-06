@@ -2,6 +2,8 @@ require('dotenv').config();
 const {Client, IntentsBitField} = require('discord.js');
 const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
+const request = require('request');
+const fs = require('fs');
 
 // the format to download is node src/index.js -d "title"
 async function download(title) {
@@ -41,7 +43,12 @@ async function download(title) {
             // reversing as the latest message will be featched first
             const reversedMessages = messages.reverse();
             reversedMessages.forEach(msg => {
-                console.log(`${msg.author.tag}: ${msg.content}`);
+                // console.log(`${msg.author.tag}: ${msg.content}`);
+                // console.log(msg.attachments);
+                if(msg.attachments.size > 0) {
+                    const fileUrl = msg.attachments.first().url;
+                    request(fileUrl).pipe(fs.createWriteStream(`./downloads/${title}.jpg`));
+                }
             });
         } catch (error) {
             console.log(error)

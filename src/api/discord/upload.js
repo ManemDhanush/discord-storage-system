@@ -42,7 +42,7 @@ async function upload(filePath, title) {
         await thread.join();
         // Send a confirmation message
         await thread.send(`Created and joined thread: ${thread.name}`);
-        await thread.send(filePath); // yet add attachment support
+        await thread.send({ files: [filePath] }); // yet add attachment support
         await client.destroy();
     });
 
