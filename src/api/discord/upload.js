@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
 const { exit } = require('process');
 
-
 // the format to upload is node src/index.js -u "filePath" "title"
 async function upload(filePath, title) {
     
@@ -17,7 +16,11 @@ async function upload(filePath, title) {
         ]
     });
     
-    mongoose.connect('mongodb://localhost:27017/discord');
+    mongoose.connect('mongodb://localhost:27017/discord').then(() => {
+        console.log("connected to mongo")
+    }). catch(err => {
+        console.log(err)
+    })
     
     client.on('ready', async () => {
         console.log(`Logged in as ${client.user.tag}!`);
