@@ -1,7 +1,7 @@
-require('dotenv').config();
 const {Client, IntentsBitField} = require('discord.js');
 const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
+const { exit } = require('process');
 
 
 // the format to upload is node src/index.js -u "filePath" "title"
@@ -44,6 +44,7 @@ async function upload(filePath, title) {
         await thread.send(`Created and joined thread: ${thread.name}`);
         await thread.send(filePath); // yet add attachment support
         await client.destroy();
+        exit(0);
     });
 
     client.login(process.env.LOGIN_TOKEN);
