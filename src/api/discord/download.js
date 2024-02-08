@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
 const request = require('request');
 const fs = require('fs');
-const { exit } = require('process');
+const { default: axios } = require('axios');
 
 // the format to download is node src/index.js -d "title"
 async function download(title) {
@@ -42,19 +42,24 @@ async function download(title) {
     
             // reversing as the latest message will be featched first
             const reversedMessages = messages.reverse();
-            reversedMessages.forEach(msg => {
-                // console.log(`${msg.author.tag}: ${msg.content}`);
-                // console.log(msg.attachments);
+            reversedMessages.forEach(async msg => {
                 if(msg.attachments.size > 0) {
+                    console.log("found attachment");
                     const fileUrl = msg.attachments.first().url;
-                    request(fileUrl).pipe(fs.createWriteStream(`./downloads/${title}.jpg`));
+                    const response = await axios({
+                        url: fileUrl,
+                        method: 'GET',
+                        responseType: 'stream'
+                    });
+
+                    response.data.pipe(fs.createWriteStream(`./downloads/${msg.attachments.first().name}`));
+                    console.log("saved " + msg.attachments.first().name + " to downloads folder");
                 }
             });
         } catch (error) {
             console.log(error)
         }
         await client.destroy();
-        exit(0);
     });
 
     client.login(process.env.LOGIN_TOKEN);
