@@ -1,9 +1,9 @@
-require('dotenv').config();
 const {Client, IntentsBitField} = require('discord.js');
 const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
 const request = require('request');
 const fs = require('fs');
+const { exit } = require('process');
 
 // the format to download is node src/index.js -d "title"
 async function download(title) {
@@ -54,6 +54,7 @@ async function download(title) {
             console.log(error)
         }
         await client.destroy();
+        exit(0);
     });
 
     client.login(process.env.LOGIN_TOKEN);
