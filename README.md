@@ -13,6 +13,7 @@
    npm install express 
    npm install discord.js
    npm install dotenv
+   npm install request
    ```
 
 ## Bot Creation
