@@ -1,7 +1,6 @@
 const {Client, IntentsBitField} = require('discord.js');
 const mongoose = require('mongoose');
 const Thread = require('../../model/thread');
-const { exit } = require('process');
 
 // the format to upload is node src/index.js -u "filePath" "title"
 async function upload(filePath, title) {
@@ -26,28 +25,36 @@ async function upload(filePath, title) {
         console.log(`Logged in as ${client.user.tag}!`);
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
         const channel = guild.channels.cache.get(process.env.CHANNEL_ID); // hardcoded for now
-        const thread = await channel.threads.create({
-            name: title, 
-            reason: 'User requested a thread' // Optional reason for audit logs
+        const res = await Thread.findOne({
+            NAME: title
         });
-        const newThread = new Thread({
-            GUILD_ID: process.env.GUILD_ID,
-            CHANNEL_ID: process.env.CHANNEL_ID,
-            THREAD_ID: thread.id,
-            NAME: thread.name
-        })
-        newThread.save().then(() => {
-            console.log("new thread created")
-        }).catch(err => {
-            console.log(err)
-        })
-        // Join the thread
-        await thread.join();
-        // Send a confirmation message
-        await thread.send(`Created and joined thread: ${thread.name}`);
-        await thread.send(filePath); // yet add attachment support
+        let thread = null;
+        if(res) {
+            console.log("thread already exists so appending it to the same thread");
+            thread = await channel.threads.cache.get(res.THREAD_ID);
+        } else {
+            thread = await channel.threads.create({
+                name: title, 
+                reason: 'User requested a thread' // Optional reason for audit logs
+            });
+            const newThread = new Thread({
+                GUILD_ID: process.env.GUILD_ID,
+                CHANNEL_ID: process.env.CHANNEL_ID,
+                THREAD_ID: thread.id,
+                NAME: thread.name
+            });
+            newThread.save().then(() => {
+                console.log("new thread saved to database")
+            }).catch(err => {
+                console.log(err)
+            })
+            // Join the thread
+            await thread.join();
+        }
+        console.log(thread);
+        await thread.send({ files: [filePath] }).then(() => console.log("attachment sent successfully")); // yet add attachment support
         await client.destroy();
-        exit(0);
+        process.exit(0);
     });
 
     client.login(process.env.LOGIN_TOKEN);
