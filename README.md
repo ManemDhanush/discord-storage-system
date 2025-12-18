@@ -17,16 +17,37 @@ The system consists of a React Frontend, a Node.js/Express Backend, MongoDB for 
 
 ```mermaid
 graph TD
-    User[User] -->|Interacts| Client[React Web App]
-    Client -->|Uploads Chunks| API[Node.js Backend]
-    API -->|Stores Metadata| DB[(MongoDB)]
-    API -->|Stores Chunks| Discord[Discord API]
-    
-    subgraph StorageLayer [Storage Layer]
-        Discord -->|Thread 1| Chunk1[Chunk 1]
-        Discord -->|Thread 1| Chunk2[Chunk 2]
-        Discord -->|Thread ...| ChunkN[Chunk N]
+    subgraph Client [Frontend Layer]
+        UI[React UI]
+        UploadMgr[Upload Manager]
+        UI -->|Selects File| UploadMgr
     end
+
+    subgraph Server [Backend Layer]
+        API[Express API]
+        Controller[Upload/Download Controller]
+        Service[Discord Service]
+        API --> Controller
+        Controller --> Service
+    end
+
+    subgraph Database [Persistence Layer]
+        Mongo[(MongoDB)]
+        Session[Upload Sessions]
+        ChunkMeta[Chunk Metadata]
+        Mongo --> Session
+        Mongo --> ChunkMeta
+    end
+
+    subgraph Storage [External Storage]
+        Discord[Discord API]
+        Thread[Discord Threads]
+        Discord --> Thread
+    end
+
+    UploadMgr -->|HTTPS Stream| API
+    Controller -->|Read/Write| Mongo
+    Service -->|Store/Retrieve Chunks| Discord
 ```
 
 ### Core Components
@@ -47,6 +68,7 @@ sequenceDiagram
     participant DB as MongoDB
     participant Discord
 
+    Note over Client, Discord: Upload Process
     Client->>Backend: POST /uploads/init
     Backend->>DB: Create UploadSession
     Backend-->>Client: Return uploadId
@@ -62,6 +84,20 @@ sequenceDiagram
 
     Client->>Backend: GET /uploads/id/status
     Backend-->>Client: Status Completed
+
+    Note over Client, Discord: Download & Reconstruction Process
+    Client->>Backend: GET /downloads/:id
+    Backend->>DB: Fetch Session & Chunk Metadata
+    DB-->>Backend: Return Metadata (Hash, MessageIDs)
+
+    loop For each chunk (Ordered)
+        Backend->>Discord: Fetch Attachment (MessageID)
+        Discord-->>Backend: Return Chunk Bytes
+        Backend->>Backend: Verify Hash
+        Backend-->>Client: Stream Chunk Bytes
+    end
+
+    Client->>Client: Reconstruct File
 ```
 
 ## 🚀 Quick Start
