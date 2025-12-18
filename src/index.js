@@ -1,4 +1,1 @@
-require('dotenv').config();
-const commandLineArguments = require('./utils/commandLine');
-
-commandLineArguments(process.argv);
+import './cli/index.js';
